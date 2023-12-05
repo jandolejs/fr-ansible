@@ -1,0 +1,19 @@
+version: '3.9'
+
+services:
+
+  web:
+    image: wordpress:6.4.1
+    environment:
+      WORDPRESS_DB_HOST: docker.host.internal
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - data:/var/www/html
+
+volumes:
+  data:
