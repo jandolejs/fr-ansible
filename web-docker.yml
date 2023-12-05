@@ -21,6 +21,9 @@
         src: ./wordpress.yml
         dest: /var/www/docker-compose.yml
 
-    - name: docker compose deploy WordPress
-      community.docker.docker_compose:
-        project_src: /var/www
+#    - name: docker compose deploy WordPress
+#      community.docker.docker_compose:
+#        project_src: /var/www
+
+    - name: run docker manually
+      raw: cd /var/www && docker compose up -d --force-recreate
