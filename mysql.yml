@@ -3,11 +3,6 @@
   hosts: web
   tasks:
 
-    - name: Install myslq
-      package:
-        name: mariadb-server
-        state: present
-
     - name: start and enable mysql service
       service:
         name: mysql
@@ -19,6 +14,16 @@
         name: "wordpress"
         state: present
 
+    - name: allow non localhost connections
+      ini_file:
+        dest: /etc/mysql/my.cnf
+        section: mysqld
+        option: "{{ item.option }}"
+        value: "{{ item.value }}"
+      register: my_cnf_changes
+      with_items:
+        - { option: bind-address, value: "*" }
+
     - name: creating mysql user
       mysql_user:
         name: "wordpress"
@@ -27,6 +32,10 @@
         host: '%'
         column_case_sensitive: true
         state: present
+
+    - name: restart mysql if cnf changed
+      command: service mysql restart
+      when: my_cnf_changes
 
   handlers:
     - name: Restart mysql

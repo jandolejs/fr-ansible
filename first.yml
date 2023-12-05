@@ -1,0 +1,17 @@
+- name: Docker is installed
+  hosts: web
+  become: yes
+  tasks:
+
+    - name: Install Docker
+      apt:
+        pkg:
+          - docker.io
+          - python3-pip
+          - mariadb-server
+          - pkg-config
+          - libmariadb-dev
+        state: present
+
+    - name: install mysqlclient
+      raw: pip install --break-system-packages mariadb mysqlclient
