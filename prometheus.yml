@@ -1,0 +1,63 @@
+- name: Prometheus is installed
+  become: yes
+  hosts: monitor
+  tasks:
+
+    - name: Install Prometheus
+      apt:
+        name: prometheus
+        state: latest
+        update_cache: yes
+
+- name: Check if Node_exporter is installed
+  hosts: monitor
+  become: yes
+
+  tasks:
+    - name: Check if Node_exporter directory exists
+      ansible.builtin.stat:
+        path: /opt/node_exporter-1.2.2.linux-amd64  # Modify according to the expected installation directory
+      register: node_exporter_dir
+
+    - name: Create node_exporter user if not exists
+      ansible.builtin.user:
+        name: node_exporter
+        system: yes
+        shell: /bin/false
+      when: not node_exporter_dir.stat.exists
+
+    - name: Install Node_exporter if not installed
+      block:
+        - name: Download and extract Node_exporter
+          get_url:
+            url: "https://github.com/prometheus/node_exporter/releases/download/v1.2.2/node_exporter-1.2.2.linux-amd64.tar.gz"
+            dest: /tmp/node_exporter.tar.gz
+
+        - name: Extract Node_exporter
+          ansible.builtin.command: tar -xzf /tmp/node_exporter.tar.gz --directory /opt
+
+        - name: Set ownership and permissions
+          ansible.builtin.file:
+            path: /opt/node_exporter-1.2.2.linux-amd64  # Modify according to the extracted directory name
+            owner: node_exporter
+            group: node_exporter
+            mode: '0755'
+
+        - name: Configure and start Node_exporter service
+          ansible.builtin.systemd:
+            name: node_exporter
+            enabled: yes
+            state: started
+            daemon_reload: yes
+            unit:
+              command: /opt/node_exporter-1.2.2.linux-amd64/node_exporter
+
+        - name: Open port 9100 in firewall
+          ansible.builtin.firewalld:
+            service: node_exporter
+            permanent: yes
+            state: enabled
+          notify: Reload firewalld
+
+      when: not node_exporter_dir.stat.exists
+
