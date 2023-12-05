@@ -4,7 +4,7 @@ services:
 
   web:
     image: wordpress:6.4.1
-host.docker.internal    environment:
+    environment:
       WORDPRESS_DB_HOST: host.docker.internal
       WORDPRESS_DB_USER: wordpress
       WORDPRESS_DB_PASSWORD: wordpress
