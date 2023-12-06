@@ -14,6 +14,14 @@
         name: "wordpress"
         state: present
 
+    - name: Copy WordPress compose file
+      copy:
+        src: ./conf/sql.gz
+        dest: /tmp/database.gz
+
+    - name: unzip database dump
+      raw: zcat /tmp/database.gz > /tmp/database.sql
+
     - name: allow non localhost connections
       ini_file:
         dest: /etc/mysql/my.cnf
@@ -36,6 +44,14 @@
     - name: restart mysql if cnf changed
       command: service mysql restart
       when: my_cnf_changes
+
+    - name: Import tables into the wordpress database
+      mysql_db:
+        name: "wordpress"
+        state: import
+        target: /tmp/database.sql
+        login_user: wordpress
+        login_password: wordpress
 
   handlers:
     - name: Restart mysql

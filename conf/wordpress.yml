@@ -12,11 +12,23 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     restart: always
-    ports:
-      - "80:80"
     volumes:
       - ./src:/var/www/html # instead of s3
     labels:
         - "traefik.enable=true"
         - "traefik.http.routers.rehorek.rule=Host(`web.local`)"
-        - "traefik.http.routers.rehorek.entrypoints=web"
+        - "traefik.http.routers.rehorek.entrypoints=web,websecure"
+
+  traefik:
+    image: traefik:v2.10
+    command: --api.insecure=true --providers.docker --entryPoints.websecure.address=:443 --entryPoints.web.address=:80 --entryPoints.websecure.http.tls=true
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+
+
+

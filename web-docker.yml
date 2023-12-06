@@ -9,6 +9,11 @@
         src: ./conf/wordpress.yml
         dest: /var/www/docker-compose.yml
 
+    - name: unzip src
+      unarchive:
+        src: conf/src.zip
+        dest: /var/www/
+
 #    - name: docker compose deploy WordPress
 #      community.docker.docker_compose:
 #        project_src: /var/www
