@@ -4,7 +4,7 @@
   tasks:
 
     - name: mkdir /etc/prometheus
-      file: 
+      file:
         path: /etc/prometheus
         state: directory
 
