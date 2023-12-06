@@ -9,13 +9,14 @@ services:
       WORDPRESS_DB_USER: wordpress
       WORDPRESS_DB_PASSWORD: wordpress
       WORDPRESS_DB_NAME: wordpress
-    restart: always
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    restart: always
     ports:
       - "80:80"
     volumes:
-      - data:/var/www/html
-
-volumes:
-  data:
+      - ./src:/var/www/html # instead of s3
+    labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.rehorek.rule=Host(`web.local`)"
+        - "traefik.http.routers.rehorek.entrypoints=web"
