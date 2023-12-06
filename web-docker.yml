@@ -6,7 +6,7 @@
 
     - name: Copy WordPress compose file
       copy:
-        src: ./wordpress.yml
+        src: ./conf/wordpress.yml
         dest: /var/www/docker-compose.yml
 
 #    - name: docker compose deploy WordPress
