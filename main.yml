@@ -1,0 +1,15 @@
+---
+
+- hosts: all
+  roles:
+  - common
+
+- hosts: monitor
+  roles:
+  - monitor
+
+- hosts: web
+  roles:
+  - prometheus.prometheus.node_exporter
+  - database
+  - web

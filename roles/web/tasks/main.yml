@@ -1,0 +1,37 @@
+
+- name: Add Docker GPG apt Key
+  become: yes
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Add Docker Repository
+  become: yes
+  apt_repository:
+    repo: deb https://download.docker.com/linux/ubuntu jammy stable
+    state: present
+
+- name: Update apt and install docker-ce
+  become: yes
+  apt:
+    name: docker-ce
+    state: latest
+    update_cache: true
+
+- name: Copy WordPress compose file
+  copy:
+    src: ./roles/web/files/wordpress.yml
+    dest: /var/www/docker-compose.yml
+
+- name: unzip src folder with contents
+  unarchive:
+    src: ./roles/web/files/src.zip
+    dest: /var/www/
+
+# commented out because docker python extension problems
+#    - name: docker compose deploy WordPress
+#      community.docker.docker_compose:
+#        project_src: /var/www
+
+- name: run docker manually
+  raw: cd /var/www && docker compose up -d --force-recreate

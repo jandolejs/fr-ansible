@@ -1,0 +1,59 @@
+
+- name: install mysqlclient
+  become: yes
+  raw: pip install --break-system-packages mariadb mysqlclient
+
+- name: start and enable mysql service
+  become: yes
+  service:
+    name: mysql
+    state: started
+    enabled: yes
+
+- name: creating wordpress database
+  become: yes
+  mysql_db:
+    name: "wordpress"
+    state: present
+
+- name: Copy WordPress compose file
+  copy:
+    src: ./roles/database/files/sql.gz
+    dest: /tmp/database.gz
+
+- name: unzip database dump
+  raw: zcat /tmp/database.gz > /tmp/database.sql
+
+- name: allow non localhost connections
+  become: yes
+  ini_file:
+    dest: /etc/mysql/my.cnf
+    section: mysqld
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  register: my_cnf_changes
+  with_items:
+    - { option: bind-address, value: "*" }
+
+- name: create mysql user
+  become: yes
+  mysql_user:
+    name: "wordpress"
+    password: "wordpress"
+    priv: 'wordpress.*:ALL'
+    host: '%'
+    column_case_sensitive: true
+    state: present
+
+- name: restart mysql
+  become: yes
+  become: yes
+  command: service mysql restart
+
+- name: Import tables into the wordpress database
+  mysql_db:
+    name: "wordpress"
+    state: import
+    target: /tmp/database.sql
+    login_user: wordpress
+    login_password: wordpress
